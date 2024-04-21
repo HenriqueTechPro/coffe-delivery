@@ -1,12 +1,12 @@
+import { CurrencyDollar, MapPin, Timer } from '@phosphor-icons/react'
+import { useTheme } from 'styled-components'
 import { useParams } from 'react-router-dom'
-import Delivery from '../../assets/delivery.svg'
-import { Container, Heading, Icons, Info, InfoContent, Order } from './styles'
-import { useContext } from 'react'
-import { CheckoutContext } from '../../context/CheckoutContext'
-import { CurrencyDollar, MapPin, Timer } from 'phosphor-react'
+
+import { useCart } from '../../hooks/useCart'
+import { Container, Heading, Info, InfoContent, Order } from './styles'
 
 export function Success() {
-  const { orders } = useContext(CheckoutContext)
+  const { orders } = useCart()
   const { orderId } = useParams()
   const orderInfo = orders.find((order) => order.id === Number(orderId))
   const paymentMethod = {
@@ -14,11 +14,7 @@ export function Success() {
     debit: 'Cartão de débito',
     cash: 'Dinheiro',
   }
-  // const theme = useTheme()
-
-  if (!orderInfo?.id) {
-    return null
-  }
+  const theme = useTheme()
 
   return (
     <Container>
@@ -31,28 +27,33 @@ export function Success() {
         <Info>
           <InfoContent>
             <div>
-              <Icons variant="purple">
-                <MapPin size={32} weight="fill" />
-              </Icons>
+              <MapPin
+                color={theme.colors.white}
+                style={{ backgroundColor: theme.colors.purple }}
+                size={32}
+              />
 
               <div>
                 <span>
                   Entrega em{' '}
                   <strong>
-                    {orderInfo.street}, {orderInfo.number}
+                    {orderInfo?.street}, {orderInfo?.number}
                   </strong>
                 </span>
 
                 <span>
-                  {orderInfo.neighborhood} - {orderInfo.city},{orderInfo.state}
+                  {orderInfo?.neighborhood} - {orderInfo?.city},
+                  {orderInfo?.state}
                 </span>
               </div>
             </div>
 
             <div>
-              <Icons variant="yellow">
-                <Timer weight="fill" size={32} />
-              </Icons>
+              <Timer
+                color={theme.colors.white}
+                style={{ backgroundColor: theme.colors.yellow }}
+                size={32}
+              />
 
               <div>
                 <span>Previsão de entrega</span>
@@ -62,9 +63,16 @@ export function Success() {
             </div>
 
             <div>
-              <Icons variant="yellow-dark">
-                <CurrencyDollar size={32} weight="fill" />
-              </Icons>
+              <CurrencyDollar
+                color={theme.colors.white}
+                style={{
+                  backgroundColor:
+                    theme.title === 'light'
+                      ? theme.colors['yellow-dark']
+                      : theme.colors['brown-400'],
+                }}
+                size={32}
+              />
 
               <div>
                 <span>Pagamento na entrega</span>
@@ -76,7 +84,7 @@ export function Success() {
         </Info>
       </Order>
 
-      <img src={Delivery} alt="Pedido concluído" />
+      <img src="/src/assets/delivery.svg" alt="Pedido concluído" />
     </Container>
   )
 }

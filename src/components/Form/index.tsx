@@ -1,20 +1,18 @@
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FormProvider, SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { useCart } from '../../hooks/useCart'
+import { toast } from 'react-toastify'
+import { getCep, GetCepResponse } from '../../api/get-cep'
 
-import { SubmitHandler, useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod/dist/zod.js'
-import { MapPinLine } from 'phosphor-react'
-import {
-  CheckoutAddressForm,
-  CheckoutContainer,
-  CheckoutForm,
-  CheckoutFormHeader,
-} from './styled'
-import { CustomInputForm } from './components/Input/CustomInput'
-import { Payment } from '../Payment'
-import { useContext } from 'react'
-import { CheckoutContext } from '../../context/CheckoutContext'
+import { PaymentContainer } from './PaymentMethod/styles'
+import { PaymentMethod } from './PaymentMethod'
+import { TextInput } from '../Inputs/TextInput'
+import { AddressContainer, AddressForm, AddressHeading } from './styles'
+import { InfoContainer } from '../../pages/Cart/styles'
+import { MapPin } from '@phosphor-icons/react'
 
-type FormInputs = {
+type FormInputsTypesProps = {
   cep: string
   street: string
   number: string
@@ -25,8 +23,10 @@ type FormInputs = {
   paymentMethod: 'credit' | 'debit' | 'cash'
 }
 
-const newOrderSchema = z.object({
-  cep: z.string({ invalid_type_error: 'Informe o CEP' }),
+const newOrder = z.object({
+  cep: z
+    .string({ invalid_type_error: 'Informe o CEP' })
+    .min(8, 'Informe um CEP válido.'),
   street: z.string().min(1, 'Informe a rua'),
   number: z.string().min(1, 'Informe o número'),
   fullAddress: z.string(),
@@ -34,102 +34,137 @@ const newOrderSchema = z.object({
   city: z.string().min(1, 'Informe a cidade'),
   state: z.string().min(1, 'Informe a UF'),
   paymentMethod: z.enum(['credit', 'debit', 'cash'], {
-    invalid_type_error: 'Informe um método de pagamento',
+    required_error: 'Informe um método de pagamento',
   }),
 })
 
-export type OrderInfo = z.infer<typeof newOrderSchema>
+export type OrderInfo = z.infer<typeof newOrder>
 
-export function PaymentForm() {
-  const { cart, checkout } = useContext(CheckoutContext)
-  const {
-    control,
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<OrderInfo>({
-    resolver: zodResolver(newOrderSchema),
+export function ClientInfoForm() {
+  const methods = useForm<FormInputsTypesProps>({
+    resolver: zodResolver(newOrder),
   })
 
-  const handleOrderCheckout: SubmitHandler<FormInputs> = (data) => {
+  const {
+    handleSubmit,
+
+    formState: { errors },
+  } = methods
+
+  async function handleLoadAddressAboutTheZipcode(cep: string) {
+    try {
+      const address: GetCepResponse | null = await getCep(cep)
+
+      if (address === null) {
+        console.error('Endereço não encontrado para o CEP:', cep)
+        return
+      }
+
+      methods.setValue('street', address.logradouro || '')
+      methods.setValue('number', address.complemento || '')
+      methods.setValue('neighborhood', address.bairro || '')
+      methods.setValue('city', address.localidade || '')
+      methods.setValue('state', address.uf || '')
+    } catch (error) {
+      console.error('Erro ao buscar o CEP:', error)
+    }
+  }
+
+  const { checkout, cart } = useCart()
+
+  const handleOrderCheckout: SubmitHandler<FormInputsTypesProps> = (data) => {
     if (cart.length === 0) {
-      return alert('É preciso ter pelo menos um item no carrinho')
+      return toast('É preciso ter pelo menos um item no carrinho')
     }
 
     checkout(data)
   }
 
   return (
-    <CheckoutContainer>
-      <span>Complete seu pedido</span>
+    <>
+      <FormProvider {...methods}>
+        <InfoContainer>
+          <h2>Complete seu pedido</h2>
 
-      <CheckoutForm id="order" onSubmit={handleSubmit(handleOrderCheckout)}>
-        <CheckoutFormHeader>
-          <MapPinLine size={22} />
+          <form id="order" onSubmit={handleSubmit(handleOrderCheckout)}>
+            <AddressContainer>
+              <AddressHeading>
+                <MapPin size={22} />
 
-          <div>
-            <span>Endereço de Entrega</span>
+                <div>
+                  <span>Endereço de Entrega</span>
 
-            <p>Informe o endereço onde deseja receber o seu pedido</p>
-          </div>
-        </CheckoutFormHeader>
+                  <p>Informe o endereço onde deseja receber o seu pedido</p>
+                </div>
+              </AddressHeading>
 
-        <CheckoutAddressForm>
-          <CustomInputForm
-            placeholder="CEP"
-            type="text"
-            containerProps={{ style: { gridArea: 'cep' } }}
-            error={errors.cep}
-            {...register('cep')}
-          />
+              <AddressForm>
+                <TextInput
+                  placeholder="CEP"
+                  type="text"
+                  containerProps={{ style: { gridArea: 'cep' } }}
+                  error={errors.cep}
+                  {...methods.register('cep', {
+                    required: 'Informe o CEP',
+                    minLength: { value: 8, message: 'Informe um CEP válido' },
+                  })}
+                  onBlur={(e) =>
+                    handleLoadAddressAboutTheZipcode(e.target.value)
+                  }
+                />
 
-          <CustomInputForm
-            placeholder="Endereço"
-            containerProps={{ style: { gridArea: 'street' } }}
-            error={errors.street}
-            {...register('street')}
-          />
+                <TextInput
+                  placeholder="Rua"
+                  containerProps={{ style: { gridArea: 'street' } }}
+                  error={errors.street}
+                  {...methods.register('street')}
+                />
 
-          <CustomInputForm
-            placeholder="Número"
-            containerProps={{ style: { gridArea: 'number' } }}
-            error={errors.number}
-            {...register('number')}
-          />
+                <TextInput
+                  placeholder="Número"
+                  containerProps={{ style: { gridArea: 'number' } }}
+                  error={errors.number}
+                  {...methods.register('number')}
+                />
 
-          <CustomInputForm
-            placeholder="Complemento"
-            containerProps={{ style: { gridArea: 'fullAddress' } }}
-            error={errors.fullAddress}
-            optional={true}
-            {...register('fullAddress')}
-          />
+                <TextInput
+                  placeholder="Complemento"
+                  optional
+                  containerProps={{ style: { gridArea: 'fullAddress' } }}
+                  error={errors.fullAddress}
+                  {...methods.register('fullAddress')}
+                />
 
-          <CustomInputForm
-            placeholder="Bairro"
-            containerProps={{ style: { gridArea: 'neighborhood' } }}
-            error={errors.neighborhood}
-            {...register('neighborhood')}
-          />
+                <TextInput
+                  placeholder="Bairro"
+                  containerProps={{ style: { gridArea: 'neighborhood' } }}
+                  error={errors.neighborhood}
+                  {...methods.register('neighborhood')}
+                />
 
-          <CustomInputForm
-            placeholder="Cidade"
-            containerProps={{ style: { gridArea: 'city' } }}
-            error={errors.city}
-            {...register('city')}
-          />
+                <TextInput
+                  placeholder="Cidade"
+                  containerProps={{ style: { gridArea: 'city' } }}
+                  error={errors.city}
+                  {...methods.register('city')}
+                />
 
-          <CustomInputForm
-            placeholder="UF"
-            maxLength={2}
-            containerProps={{ style: { gridArea: 'state' } }}
-            error={errors.state}
-            {...register('state')}
-          />
-        </CheckoutAddressForm>
-      </CheckoutForm>
+                <TextInput
+                  placeholder="UF"
+                  maxLength={2}
+                  containerProps={{ style: { gridArea: 'state' } }}
+                  error={errors.state}
+                  {...methods.register('state')}
+                />
+              </AddressForm>
+            </AddressContainer>
 
-      <Payment control={control} errors={errors} />
-    </CheckoutContainer>
+            <PaymentContainer>
+              <PaymentMethod control={methods.control} errors={errors} />
+            </PaymentContainer>
+          </form>
+        </InfoContainer>
+      </FormProvider>
+    </>
   )
 }

@@ -1,90 +1,76 @@
 import styled from 'styled-components'
-import { fonts } from '../../styles/themes/default'
+import { mixins } from '../../styles/mixins'
 
 export const Container = styled.main`
   display: flex;
-  max-width: 72.5rem;
+  max-width: 1160px;
   margin: 0 auto;
-  padding: 5rem 1.25rem;
+  padding: 80px 20px;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 2.5rem;
+  gap: 40px;
 
   img {
-    margin-bottom: -0.8125rem;
+    margin-bottom: -13px;
   }
 `
 
 export const Order = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 40px;
 `
 
 export const Heading = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 4px;
 
   h2 {
-    ${fonts.titleL};
-    color: ${(props) => props.theme['yellow-dark']};
+    ${mixins.fonts.titleL};
+    color: ${({ theme }) => theme.colors['yellow-dark']};
   }
 
   span {
-    ${fonts.textL};
-    color: ${(props) => props.theme['base-subtitle']};
+    ${mixins.fonts.textL};
+    color: ${(props) => props.theme.colors['brown-700']};
   }
 `
 
 export const Info = styled.div`
   border: 1px solid;
-  border-radius: 0.375rem 2.25rem;
+  border-radius: 6px 36px;
   width: 100%;
 
   border-color: transparent;
   background-origin: border-box;
   background-image: ${(props) =>
-    `linear-gradient(to bottom right, ${props.theme.yellow}, ${props.theme.purple})`};
+    `linear-gradient(to bottom right, ${props.theme.colors.yellow}, ${props.theme.colors.purple})`};
 `
 
 export const InfoContent = styled.div`
-  padding: 2.5rem;
-  background-color: white;
-  border-radius: 0.375rem 2.25rem;
+  padding: 40px;
+  background: ${(props) => props.theme.colors['brown-200']};
+
+  border-radius: 6px 36px;
 
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 32px;
 
   > div {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 12px;
+
+    > svg {
+      padding: 8px;
+      border-radius: 999px;
+    }
   }
 
   > div div {
     display: flex;
     flex-direction: column;
-  }
-`
-
-interface IconsProps {
-  variant?: 'yellow-dark' | 'yellow' | 'purple'
-}
-
-export const Icons = styled.div<IconsProps>`
-  > svg {
-    color: ${(props) => props.theme.white};
-    background: ${(props) =>
-      props.variant === 'yellow-dark'
-        ? props.theme['yellow-dark']
-        : props.variant === 'yellow'
-          ? props.theme.yellow
-          : props.variant === 'purple'
-            ? props.theme.purple
-            : props.theme['yellow-dark']};
-    padding: 0.5rem;
-    border-radius: 50%;
   }
 `

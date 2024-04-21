@@ -1,68 +1,57 @@
-import { MapPin, ShoppingCart } from 'phosphor-react'
-import CoffeeDeliveryLogo from '../../assets/logo-coffee-delivery.svg'
-import {
-  CartButton,
-  Container,
-  Content,
-  HeaderContainer,
-  PreviwerCartButton,
-  PreviwerContainer,
-  PreviwerContent,
-} from './styles'
-import { Link } from 'react-router-dom'
-import { useContext, useState } from 'react'
-import { CheckoutContext } from '../../context/CheckoutContext'
-import * as Popover from '@radix-ui/react-popover'
-import { CartPreview } from '../CartPreview'
+import { House, MapPin, Moon, ShoppingCart, Sun } from '@phosphor-icons/react'
+import { Link, useNavigate } from 'react-router-dom'
 
+import { useCart } from '../../hooks/useCart'
+import { Aside, Container, HomeButton, LocationBadge } from './styles'
+
+import DarkLogoCoffeeDelivery from '../../assets/logo-coffee-delivery-dark.svg'
+import LightLogoCoffeeDelivery from '../../assets/logo-coffee-delivery-light.svg'
+import { useSwitchTheme } from '../../hooks/useSwitchTheme'
 export function Header() {
-  const { cart } = useContext(CheckoutContext)
-  const [isHovered, setIsHovered] = useState(false)
+  const { cart } = useCart()
+  const navigate = useNavigate()
+  const { toggleTheme, themeSelected } = useSwitchTheme()
 
-  const handleMouseEnter = () => {
-    setIsHovered(true)
-  }
-
-  const handleMouseLeave = () => {
-    setIsHovered(false)
+  function handleToggleTheme() {
+    toggleTheme(themeSelected === 'light' ? 'dark' : 'light')
   }
 
   return (
     <Container>
-      <HeaderContainer>
-        <Link to={'/'}>
-          <img src={CoffeeDeliveryLogo} alt="Coffee Delivery" />
-        </Link>
+      <Link to="/">
+        <img
+          src={
+            themeSelected === 'light'
+              ? DarkLogoCoffeeDelivery
+              : LightLogoCoffeeDelivery
+          }
+          alt="Coffee Delivery"
+        />
+      </Link>
 
-        <Content>
-          <p>
-            <span className="map-pin-icon">
-              <MapPin size={22} weight="fill" />
-            </span>
-            Porto Alegre, RS
-          </p>
-          <PreviwerContainer open={isHovered} onOpenChange={setIsHovered}>
-            <Popover.Anchor asChild>
-              <PreviwerCartButton
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                <CartButton>
-                  <Link to={'/checkout'} aria-disabled={cart.length === 0}>
-                    <ShoppingCart size={22} weight="fill" />
-                    {cart.length > 0 ? <span>{cart.length}</span> : null}
-                  </Link>
-                </CartButton>
-              </PreviwerCartButton>
-            </Popover.Anchor>
-            <PreviwerContent className="PopoverContent" sideOffset={4}>
-              <div>
-                <CartPreview />
-              </div>
-            </PreviwerContent>
-          </PreviwerContainer>
-        </Content>
-      </HeaderContainer>
+      <Aside>
+        <LocationBadge>
+          <MapPin size={22} weight="fill" />
+          <span>Lauro de Freitas, BA</span>
+        </LocationBadge>
+
+        <HomeButton onClick={handleToggleTheme} title="Trocar tema">
+          {themeSelected === 'light' ? (
+            <Moon size={18} weight="bold" />
+          ) : (
+            <Sun size={18} weight="bold" />
+          )}
+        </HomeButton>
+
+        <HomeButton onClick={() => navigate('/')} title="Home">
+          <House size={18} weight="bold" />
+        </HomeButton>
+
+        <Link to={`/checkout`} aria-disabled={cart.length === 0}>
+          <ShoppingCart size={22} weight="fill" />
+          {cart.length > 0 ? <span>{cart.length}</span> : null}
+        </Link>
+      </Aside>
     </Container>
   )
 }

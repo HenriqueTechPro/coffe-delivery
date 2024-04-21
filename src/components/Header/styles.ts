@@ -1,119 +1,132 @@
 import styled from 'styled-components'
-import { fonts } from '../../styles/themes/default'
-import * as Popover from '@radix-ui/react-popover'
 
-export const Container = styled.div`
-  display: flex;
-  justify-content: center;
-`
+import { mixins } from '../../styles/mixins'
 
-export const HeaderContainer = styled.header`
-  width: 100%;
-  max-width: 90rem;
-  padding: 2rem 10rem;
+export const Container = styled.header`
+  max-width: 1160px;
+  padding: 32px 20px;
+  margin: 0 auto;
+
   display: flex;
-  padding: 2rem 10rem;
   justify-content: space-between;
   align-items: center;
 
-  background: ${(props) => props.theme.background};
+  position: sticky;
+  top: 0;
+
+  background: ${(props) => props.theme.colors['brown-100']};
+  z-index: 9999;
 `
 
-export const Content = styled.div`
+export const Aside = styled.aside`
   display: flex;
-  justify-content: flex-end;
+  gap: 12px;
 
-  gap: 0.75rem;
-
-  p {
+  div {
     display: flex;
-    padding: 0.5rem;
-    justify-content: center;
     align-items: center;
+    gap: 4px;
 
-    gap: 0.25rem;
+    background-color: ${(props) => props.theme.colors['purple-light']};
 
-    border-radius: 6px;
-    background: ${(props) => props.theme['purple-light']};
-
-    color: ${(props) => props.theme['purple-dark']};
-
-    ${fonts.textS}
-
-    & svg {
-      color: ${(props) => props.theme.purple};
+    svg {
+      color: ${(props) => props.theme.colors.purple};
     }
+
+    span {
+      color: ${(props) => props.theme.colors['purple-dark']};
+    }
+
+    padding: 10px 8px;
+    border-radius: 6px;
   }
-`
-export const CartButton = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  position: relative;
-  cursor: pointer;
 
   a {
     display: flex;
-    padding: 0.5rem;
-    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
 
-    border: 0;
+    background-color: ${(props) => props.theme.colors['yellow-light']};
+    color: ${(props) => props.theme.colors['yellow-dark']};
 
+    padding: 8px;
     border-radius: 6px;
-    background: ${(props) => props.theme['yellow-light']};
 
-    & svg {
-      color: ${(props) => props.theme['yellow-dark']};
-    }
+    position: relative;
 
     &[aria-disabled='true'] {
       pointer-events: none;
     }
-  }
 
-  span {
-    display: flex;
-    width: 1.25rem;
-    height: 1.25rem;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    position: absolute;
-    right: -8.345px;
-    top: -8px;
+    span {
+      ${mixins.fonts.textS};
+      font-weight: bold;
+      color: ${(props) =>
+        props.theme.title === 'light'
+          ? props.theme.colors.white
+          : props.theme.colors['purple-light']};
+      background: ${(props) =>
+        props.theme.title === 'light'
+          ? props.theme.colors['yellow-dark']
+          : props.theme.colors.white};
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-    border-radius: 50%;
-    background: ${(props) => props.theme['yellow-dark']};
-
-    flex-shrink: 0;
-
-    color: ${(props) => props.theme.white};
-
-    ${fonts.textXS}
-    letter-spacing: -0.74px;
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      transform: translate(50%, -50%);
+    }
   }
 `
-export const PreviwerContainer = styled(Popover.Root)``
-export const PreviwerCartButton = styled(Popover.Trigger)`
-  border: 0;
+export const LocationBadge = styled.span`
+  padding: 0.5rem;
   border-radius: 6px;
-  background: ${(props) => props.theme['yellow-light']};
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  font-size: 0.875rem;
+  color: ${(props) => props.theme.colors['purple-dark']};
+
+  background: ${(props) => props.theme.colors['purple-light']};
+
+  svg {
+    color: ${(props) =>
+      props.theme.title === 'light'
+        ? props.theme.colors.purple
+        : props.theme.colors.white};
+  }
+
+  @media (max-width: 600px) {
+    span {
+      display: none;
+    }
+  }
+`
+
+export const Button = styled.button`
+  padding: 0.5rem;
+  border-radius: 6px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 
   cursor: pointer;
-`
-export const PreviwerContent = styled(Popover.Content)`
-  transform-origin: var(--radix-popover-content-transform-origin);
-  animation: scaleIn 0.3s ease-out;
+  transition: opacity 0.3s;
 
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+  &:hover {
+    opacity: 0.7;
   }
+`
+
+export const HomeButton = styled(Button)`
+  color: ${(props) => props.theme.colors['purple-dark']};
+  background: ${(props) => props.theme.colors['purple-light']};
 `
