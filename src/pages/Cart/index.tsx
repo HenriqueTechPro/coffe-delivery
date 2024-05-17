@@ -2,7 +2,7 @@ import { Fragment } from 'react'
 
 import { Trash } from '@phosphor-icons/react'
 
-import { coffees } from '../../../server.json'
+import { coffees } from '../../../data.json'
 import { useCart } from '../../hooks/useCart'
 import { QuantityInput } from '../../components/Inputs/QuantityInput'
 

@@ -11,18 +11,11 @@ import {
   Info,
   ListItem,
 } from './styles'
-import { getAllCoffees } from '../../api/get-coffees'
-import { useQuery } from '@tanstack/react-query'
+import { coffees } from '../../../data.json'
 import { useTheme } from 'styled-components'
 
 export function Home() {
   const theme = useTheme()
-
-  const { data: coffees } = useQuery({
-    queryKey: ['coffees'],
-    queryFn: getAllCoffees,
-    staleTime: Infinity,
-  })
 
   return (
     <div>
@@ -95,7 +88,9 @@ export function Home() {
         <h2>Nossos cafés</h2>
 
         <div>
-          {coffees?.map((coffee) => <Card key={coffee.id} coffee={coffee} />)}
+          {coffees.map((coffee) => (
+            <Card key={coffee.id} coffee={coffee} />
+          ))}
         </div>
       </CoffeeList>
     </div>
